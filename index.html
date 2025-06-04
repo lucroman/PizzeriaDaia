@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Bella Daia - Pizzerie</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<script>
+// Validează formularul de contact (exemplu pentru nume, email și mesaj)
+function valideazaFormularContact(event) {
+    const email = document.getElementById('contact-email');
+    const mesaj = document.getElementById('contact-mesaj');
+    let valid = true;
+    let mesajEroare = "";
+
+    if (!email.value || !email.value.match(/^[^@]+@[^@]+\.[a-z]{2,}$/i)) {
+        mesajEroare += "Introduceți o adresă de email validă.\n";
+        valid = false;
+    }
+    if (!mesaj.value || mesaj.value.length < 5) {
+        mesajEroare += "Introduceți un mesaj de minim 5 caractere.\n";
+        valid = false;
+    }
+
+    if (!valid) {
+        alert(mesajEroare);
+        event.preventDefault();
+    }
+}
+
+// Atașează validarea la formularul de contact
+document.addEventListener('DOMContentLoaded', function() {
+    const formular = document.getElementById('contact-form');
+    if (formular) {
+        formular.addEventListener('submit', valideazaFormularContact);
+    }
+});
+</script>
+<body>
+    <div id="login-overlay"></div>
+    <header>
+        <h1>La Bella Daia</h1>
+        <nav>
+            <ul>
+                <li><a href="#home">Acasă</a></li>
+                <li><a href="#menu">Meniu</a></li>
+                <li><a href="#about">Despre Noi</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li>
+                    <button id="user-icon-btn" style="background:none;border:none;cursor:pointer;padding:0;margin-left:1em;">
+                        <img src="https://ui-avatars.com/api/?name=User" alt="User" style="width:32px;height:32px;border-radius:50%;vertical-align:middle;">
+                    </button>
+                </li>
+            </ul>
+        </nav>
+        <!-- Panoul de login/profil, pop-up central -->
+        <div id="login-profile-container" style="display:none;position:absolute;top:70px;right:2em;min-width:220px;background:#fff8f0;border-radius:8px;box-shadow:0 2px 8px rgba(178,34,34,0.10);padding:1em 1em 0.5em 1em;z-index:100;">
+            <section id="login" class="login-section">
+                <form id="login-form" action="#" method="post" style="display:flex;flex-direction:column;gap:0.7em;">
+                    <label for="login-email">Email:</label>
+                    <input type="email" id="login-email" name="login-email" required>
+                    <label for="login-password">Parolă:</label>
+                    <input type="password" id="login-password" name="login-password" required>
+                    <div style="display:flex;gap:0.5em;">
+                        <button type="submit">Autentificare</button>
+                        <button type="button" id="show-register">Înregistrare</button>
+                    </div>
+                </form>
+                <form id="register-form" action="#" method="post" style="display:none;flex-direction:column;gap:0.7em;">
+                    <label for="register-email">Email:</label>
+                    <input type="email" id="register-email" name="register-email" required>
+                    <label for="register-password">Parolă:</label>
+                    <input type="password" id="register-password" name="register-password" required>
+                    <div style="display:flex;gap:0.5em;">
+                        <button type="submit">Creează cont</button>
+                        <button type="button" id="show-login">Am deja cont</button>
+                    </div>
+                </form>
+                <div id="user-panel" style="display:none;margin-top:1em;">
+                    <h3 style="margin-bottom:0.5em;">Bun venit, <span id="user-name"></span>!</h3>
+                    <img id="user-avatar" src="https://ui-avatars.com/api/?name=User" alt="Avatar utilizator" style="width:50px;height:50px;border-radius:50%;margin-bottom:0.5em;">
+                    <h4 style="margin:0.5em 0 0.2em 0;">Istoric comenzi</h4>
+                    <ul id="istoric-comenzi" style="font-size:0.95em;max-height:80px;overflow:auto;margin-bottom:0.5em;">
+                        <!-- Comenzile vor fi afișate aici -->
+                    </ul>
+                    <form id="order-form" action="#" method="post" style="display:flex;flex-direction:column;gap:0.3em;">
+                        <label for="order-details" style="font-size:0.95em;">Detalii comandă:</label>
+                        <textarea id="order-details" name="order-details" required style="font-size:0.95em;"></textarea>
+                        <div style="display:flex;gap:0.5em;">
+                            <button type="submit" style="font-size:0.95em;">Trimite Comanda</button>
+                            <button type="button" id="logout-btn" style="font-size:0.95em;background:#888;">Logout</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- Adaugă acest div în interiorul #login-profile-container, după #user-panel -->
+                <div id="admin-panel" style="display:none; margin-top:1.5em; background:#fff3e0; border-radius:8px; padding:1em; box-shadow:0 2px 8px rgba(178,34,34,0.10);">
+                    <h3 style="color:#b22222; margin-top:0;">Panou Administrator</h3>
+                    <ul style="padding-left:1em;">
+                        <li><a href="#" style="color:#b22222; text-decoration:underline;">Vizualizează toate comenzile</a></li>
+                        <li><a href="#" style="color:#b22222; text-decoration:underline;">Gestionează utilizatori</a></li>
+                        <li><a href="#" style="color:#b22222; text-decoration:underline;">Adaugă/editează produse</a></li>
+                    </ul>
+                    <p style="font-size:0.95em; color:#444;">Ai acces la funcții speciale de administrare.</p>
+                </div>
+            </section>
+        </div>
+    </header>
+    <!-- Adaugă acest bloc imediat după </header> și înainte de <main> -->
+    <div id="side-panel">
+        <div class="side-section">
+            <h4>Program</h4>
+            <p>Luni - Vineri: <b>11:00 - 22:00</b></p>
+            <p>Sâmbătă - Duminică: <b>12:00 - 23:00</b></p>
+        </div>
+        <div class="side-section">
+            <h4>Contact</h4>
+            <p>Telefon: <a href="tel:0722123456">0722 123 456</a></p>
+            <p>Email: <a href="mailto:contact@labelladaia.ro">contact@labelladaia.ro</a></p>
+            <p>Adresa: Daia Română 517270</p>
+        </div>
+    </div>
+    <main>
+        <section id="home" class="hero">
+            <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80" alt="Pizza delicioasă la La Bella Daia" class="hero-image">
+            <div class="hero-content">
+                <h2>Bine ați venit la La Bella Daia</h2>
+                <p>
+                    Experimentați gustul Italiei în fiecare felie! La La Bella Daia, pregătim pizza autentică italiană folosind cele mai proaspete ingrediente și rețete tradiționale transmise din generație în generație.
+                </p>
+            </div>
+        </section>
+
+        <section id="featured-pizzas" class="featured-pizzas">
+            <h2>Pizze Recomandate</h2>
+            <div class="carousel">
+                <button class="carousel-btn prev" aria-label="Anterior">&#10094;</button>
+                <div class="carousel-track">
+                    <!-- Margherita -->
+                    <div class="pizza-item active">
+                        <img src="resources/Pizza Margherita.jpeg" alt="Pizza Margherita">
+                        <h3>Margherita</h3>
+                        <p>Simplitate italiană la superlativ: blat crocant, sos de roșii aromat, mozzarella topită și busuioc proaspăt. Gustul autentic al Italiei într-o singură felie!</p>
+                    </div>
+                    <!-- Pepperoni -->
+                    <div class="pizza-item">
+                        <img src="resources/Pizza Pepperoni that looks more delicious.jpeg" alt="Pizza Pepperoni">
+                        <h3>Pepperoni</h3>
+                        <p>Un clasic american reinterpretat: salam pepperoni picant, mozzarella din abundență și sos de roșii bogat. Perfectă pentru iubitorii de gust intens!</p>
+                    </div>
+                    <!-- Quattro Formaggi -->
+                    <div class="pizza-item">
+                        <img src="resources/Quattro Formaggi Pizza.jpeg" alt="Pizza Quattro Formaggi">
+                        <h3>Quattro Formaggi</h3>
+                        <p>O explozie de brânzeturi: mozzarella, gorgonzola, parmezan și fontina, toate topite pe un blat pufos. O alegere decadentă pentru adevărații gurmanzi!</p>
+                    </div>
+                    <!-- Vegetariana -->
+                    <div class="pizza-item">
+                        <img src="resources/vegetariana.jpg" alt="Pizza Vegetariana">
+                        <h3>Vegetariana</h3>
+                        <p>Prospețime la fiecare mușcătură: legume de sezon, mozzarella și sos de roșii, pe un blat crocant. O pizza colorată, sănătoasă și plină de savoare!</p>
+                    </div>
+                    <!-- Capriciosa -->
+                    <div class="pizza-item">
+                        <img src="resources/capriciosa.jpg" alt="Pizza Capriciosa">
+                        <h3>Capriciosa</h3>
+                        <p>O combinație regală: șuncă, ciuperci, măsline, anghinare, mozzarella și sos de roșii. Fiecare ingredient aduce un plus de rafinament și gust!</p>
+                    </div>
+                    <!-- Diavola -->
+                    <div class="pizza-item">
+                        <img src="resources/Pizza Diavola.jpeg" alt="Pizza Diavola">
+                        <h3>Diavola</h3>
+                        <p>Pizza cu personalitate: salam picant, mozzarella, sos de roșii și un strop de ardei iute. Pentru cei care iubesc senzațiile tari!</p>
+                    </div>
+                    <!-- Focaccia -->
+                    <div class="pizza-item">
+                        <img src="resources/focaccia.jpg" alt="Focaccia">
+                        <h3>Focaccia</h3>
+                        <p>Simplitate rustică: blat pufos, ulei de măsline extravirgin și rozmarin proaspăt. Gustul autentic al Italiei rurale, perfect ca aperitiv sau gustare!</p>
+                    </div>
+                    <!-- Chicken Pizza -->
+                    <div class="pizza-item">
+                        <img src="resources/chicken.jpg" alt="Pizza cu pui">
+                        <h3>Pizza cu pui</h3>
+                        <p>Pui fraged, mozzarella, ardei și ceapă roșie pe un pat de sos de roșii. O pizza sățioasă, cu arome echilibrate și texturi delicioase!</p>
+                    </div>
+                    <!-- Meatlover -->
+                    <div class="pizza-item">
+                        <img src="resources/meatlover.jpg" alt="Pizza Meatlover">
+                        <h3>Meatlover</h3>
+                        <p>Festin pentru carnivori: pepperoni, șuncă, bacon, cârnați și mozzarella, toate pe un blat generos. Satisfacție maximă la fiecare felie!</p>
+                    </div>
+                </div>
+                <button class="carousel-btn next" aria-label="Următor">&#10095;</button>
+            </div>
+        </section>
+
+        <section id="menu">
+            <h2>Meniul Nostru</h2>
+            <ul>
+                <li>Margherita</li>
+                <li>Pepperoni</li>
+                <li>Quattro Formaggi</li>
+                <li>Vegetariana</li>
+            </ul>
+        </section>
+        <section id="about">
+            <h2>Despre Noi</h2>
+            <p>Pizzerie de familie care servește pizza delicioasă si cu ingrediente sanatoase.</p>
+        </section>
+        <section id="contact">
+            <h2>Contact</h2>
+            <p>Email: info@labelladaia.com</p>
+            <p>Telefon: (123) 456-7890</p>
+            <form id="contact-form" action="#" method="post" style="max-width:400px;margin:1em 0;">
+                <label for="contact-email">Email:</label>
+                <input type="email" id="contact-email" name="email" required style="width:100%;margin-bottom:0.5em;">
+                <label for="contact-mesaj">Mesaj:</label>
+                <textarea id="contact-mesaj" name="mesaj" required style="width:100%;margin-bottom:0.5em;"></textarea>
+                <button type="submit">Trimite</button>
+            </form>
+            <h3>Ne găsiți aici:</h3>
+            <div style="width:100%;max-width:600px;margin:1em 0;">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2716.348095979618!2d23.53722707690748!3d46.07031697109237!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x474e9d1e1e8e7e1d%3A0x7e2e2e2e2e2e2e2e!2sDaia%20Rom%C3%A2n%C4%83%2C%20Jude%C8%9Bul%20Alba!5e0!3m2!1sro!2sro!4v1717430000000!5m2!1sro!2sro"
+                    width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Urmărește-ne</h4>
+                <a href="https://facebook.com" target="_blank" rel="noopener">Facebook</a> |
+                <a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a> |
+                <a href="https://tiktok.com" target="_blank" rel="noopener">TikTok</a>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <p>Email: info@labelladaia.com</p>
+                <p>Telefon: (123) 456-7890</p>
+            </div>
+            <div class="footer-section">
+                <h4>Program</h4>
+                <p>Luni - Vineri: 11:00 - 22:00</p>
+                <p>Sâmbătă - Duminică: 12:00 - 23:00</p>
+            </div>
+        </div>
+        <p style="text-align:center;">&copy; 2025 La Bella Daia. Toate drepturile rezervate.</p>
+    </footer>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const track = document.querySelector('.carousel-track');
+    const items = Array.from(track.children);
+    const prevBtn = document.querySelector('.carousel-btn.prev');
+    const nextBtn = document.querySelector('.carousel-btn.next');
+    let currentIndex = 0;
+
+    function updateCarousel(index) {
+        items.forEach((item, i) => {
+            item.classList.toggle('active', i === index);
+        });
+    }
+
+    prevBtn.addEventListener('click', () => {
+        currentIndex = (currentIndex - 1 + items.length) % items.length;
+        updateCarousel(currentIndex);
+    });
+
+    nextBtn.addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % items.length;
+        updateCarousel(currentIndex);
+    });
+});
+</script>
+<script>
+// Simulare login și funcționalitate user (fără backend, doar demo)
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const userPanel = document.getElementById('user-panel');
+    const userNameSpan = document.getElementById('user-name');
+    const userAvatar = document.getElementById('user-avatar');
+    const istoricComenzi = document.getElementById('istoric-comenzi');
+    const orderForm = document.getElementById('order-form');
+    const logoutBtn = document.getElementById('logout-btn');
+    const showRegisterBtn = document.getElementById('show-register');
+    const showLoginBtn = document.getElementById('show-login');
+    const adminPanel = document.getElementById('admin-panel');
+
+    // Simulare date user
+    let user = null;
+    let comenzi = [];
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const isAdmin = email.trim().toLowerCase() === 'admin@labelladaia.com';
+            user = {
+                name: email.split('@')[0],
+                email: email,
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(email.split('@')[0])}`,
+                admin: isAdmin
+            };
+            userNameSpan.textContent = user.name;
+            userAvatar.src = user.avatar;
+            loginForm.style.display = 'none';
+            userPanel.style.display = 'block';
+            if (adminPanel) adminPanel.style.display = isAdmin ? 'block' : 'none';
+            comenzi = [];
+            afiseazaComenzi();
+        });
+    }
+
+    if (showRegisterBtn) {
+        showRegisterBtn.addEventListener('click', function() {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'flex';
+        });
+    }
+
+    if (showLoginBtn) {
+        showLoginBtn.addEventListener('click', function() {
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'flex';
+        });
+    }
+
+    // Simulare înregistrare (doar demo)
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('register-email').value;
+            user = {
+                name: email.split('@')[0],
+                email: email,
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(email.split('@')[0])}`
+            };
+            userNameSpan.textContent = user.name;
+            userAvatar.src = user.avatar;
+            registerForm.style.display = 'none';
+            userPanel.style.display = 'block';
+            comenzi = [];
+            afiseazaComenzi();
+        });
+    }
+
+    function afiseazaComenzi() {
+        istoricComenzi.innerHTML = '';
+        if (comenzi.length === 0) {
+            istoricComenzi.innerHTML = '<li>Nu există comenzi.</li>';
+        } else {
+            comenzi.forEach((c, i) => {
+                const li = document.createElement('li');
+                li.textContent = `#${i+1}: ${c}`;
+                istoricComenzi.appendChild(li);
+            });
+        }
+    }
+
+    if (orderForm) {
+        orderForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const detalii = document.getElementById('order-details').value;
+            comenzi.push(detalii);
+            afiseazaComenzi();
+            orderForm.reset();
+        });
+    }
+
+    // Logout
+    if (logoutBtn) {
+        logoutBtn.onclick = function() {
+            user = null;
+            comenzi = [];
+            userPanel.style.display = 'none';
+            loginForm.style.display = 'flex';
+            registerForm.style.display = 'none';
+            if (adminPanel) adminPanel.style.display = 'none';
+            loginForm.reset();
+            if (orderForm) orderForm.reset();
+        };
+    }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userIconBtn = document.getElementById('user-icon-btn');
+    const loginProfileContainer = document.getElementById('login-profile-container');
+    const loginOverlay = document.getElementById('login-overlay');
+
+    if (userIconBtn && loginProfileContainer && loginOverlay) {
+        userIconBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            loginProfileContainer.style.display = 'block';
+            loginOverlay.style.display = 'block';
+        });
+
+        // Ascunde panoul doar dacă se dă click pe overlay, nu pe document!
+        loginOverlay.addEventListener('click', function() {
+            loginProfileContainer.style.display = 'none';
+            loginOverlay.style.display = 'none';
+        });
+
+        // Elimină orice alt event listener care ascunde la click pe document!
+        // Nu adăuga niciun document.addEventListener('click', ...) care ascunde pop-up-ul.
+    }
+});
+</script>
+</body>
+</html>
